@@ -8,14 +8,17 @@ import { connect } from "react-redux";
 import * as actions from "../../store/action";
 import { useNavigate, useLocation } from "react-router-dom";
 
+
+
 class LoginPage extends React.Component {
   state = {
-    error: false,
+    error: '',
     requestBody: {
       email: "",
       password: "",
     },
   };
+
 
   inputChangedHandler = (event) => {
     const updatedFormBody = {
@@ -30,6 +33,19 @@ class LoginPage extends React.Component {
     const formdata = this.state.requestBody;
     this.props.onAuth(formdata["email"], formdata["password"]);
   };
+  
+  handleLoginButtonClick = (e) => {
+    this.setErrorMessage(null)
+    this.props.uauth.login().catch(error => {
+      console.error('login error:', error)
+      this.setErrorMessage('User failed to login.')
+    })
+  }
+  
+  setErrorMessage = (msg) => {
+    this.setState({ error: msg });
+  }
+
 
   componentDidUpdate() {
     if (this.props.error) {
@@ -44,7 +60,7 @@ class LoginPage extends React.Component {
   }
 
   render() {
-    let errorMessage = <p style={{ color: "red" }}>{this.props.error}</p>;
+    let errorMessage = <p style={{ color: "red" }}>{this.state.error}</p>;
     return (
       <Auth>
         {this.props.loading ? <Loader /> : null}
@@ -53,41 +69,13 @@ class LoginPage extends React.Component {
             <img src={Tweeter} className="tweeterHome" />
           </Link>
           {errorMessage}
-          <form onSubmit={this.submitHandler}>
-            <i className="material-icons-outlined">email</i>
-            <input
-              name="email"
-              type="email"
-              placeholder="Email"
-              onMouseOver={() => this.setState({ focus: { email: true } })}
-              onChange={this.inputChangedHandler}
-            />
-            <i className="material-icons-outlined">lock</i>
-            <input
-              name="password"
-              type="password"
-              placeholder="Password"
-              onMouseOver={() => this.setState({ focus: { password: true } })}
-              onMouseLeave={() => this.setState({ focus: { password: false } })}
-              onChange={this.inputChangedHandler}
-            />
-            <button>Start tweeting now</button>
-          </form>
-          {/* <div>
-          {/* <p>or continue with these social profile</p> */}
-          {/* <i class="fa fa-google"></i>
-                <i class="fa fa-facebook"></i>
-                <i class="fa fa-twitter"></i>
-                <i class="fa fa-github"></i> 
-        </div> */}
-          <p>
-            Don't have an account yet? <Link to="/signup">Register</Link>
-          </p>
+          <button onClick={this.handleLoginButtonClick}>Login with Unstoppable</button>
         </div>
       </Auth>
     );
   }
 }
+
 const mapStateToProps = (state) => {
   return {
     loading: state.loading,
